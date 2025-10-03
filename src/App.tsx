@@ -1,10 +1,37 @@
 import { useState, useEffect } from 'react'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { CssBaseline, CircularProgress, Box } from '@mui/material'
 import apiService from './config/apiService'
 import './config/testApi' // This will auto-test API connection in development
 import './App.css'
 import Dashboard from './components/Dashboard'
 import Signup from './components/Signup'
 import Login from './components/Login'
+
+// Create MUI theme
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+    background: {
+      default: '#f5f5f5',
+    },
+  },
+  typography: {
+    h1: {
+      fontSize: '2rem',
+      fontWeight: 600,
+    },
+    h2: {
+      fontSize: '1.5rem',
+      fontWeight: 500,
+    },
+  },
+})
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -51,47 +78,61 @@ function App() {
 
   if (loading) {
     return (
-      <div className="loading">
-        <h2>Loading...</h2>
-      </div>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="100vh"
+          flexDirection="column"
+          gap={2}
+        >
+          <CircularProgress size={60} />
+          <Box>Loading...</Box>
+        </Box>
+      </ThemeProvider>
     )
   }
 
-  if (isAuthenticated) {
-    return <Dashboard user={user} onLogout={handleLogout} />
-  }
-
   return (
-    <div className="auth-container">
-      <h1>DA Admin</h1>
-      {showSignup ? (
-        <>
-          <Signup onSignup={handleLogin} />
-          <p>
-            Already have an account?{' '}
-            <button 
-              className="link-button" 
-              onClick={() => setShowSignup(false)}
-            >
-              Login here
-            </button>
-          </p>
-        </>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {isAuthenticated ? (
+        <Dashboard user={user} onLogout={handleLogout} />
       ) : (
-        <>
-          <Login onLogin={handleLogin} />
-          <p>
-            Don't have an account?{' '}
-            <button 
-              className="link-button" 
-              onClick={() => setShowSignup(true)}
-            >
-              Sign up here
-            </button>
-          </p>
-        </>
+        <div className="auth-container">
+          <h1>DA Admin</h1>
+          {showSignup ? (
+            <>
+              <Signup onSignup={handleLogin} />
+              <p>
+                Already have an account?{' '}
+                <button 
+                  className="link-button" 
+                  onClick={() => setShowSignup(false)}
+                >
+                  Login here
+                </button>
+              </p>
+            </>
+          ) : (
+            <>
+              <Login onLogin={handleLogin} />
+              <p>
+                Don't have an account?{' '}
+                <button 
+                  className="link-button" 
+                  onClick={() => setShowSignup(true)}
+                >
+                  Sign up here
+                </button>
+              </p>
+            </>
+          )}
+        </div>
       )}
-    </div>
+    </ThemeProvider>
   )
 }
 

@@ -1,4 +1,15 @@
 import { useState } from 'react'
+import {
+  Box,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  Alert,
+  CircularProgress,
+  InputAdornment,
+} from '@mui/material'
+import { Email, Lock, Login as LoginIcon } from '@mui/icons-material'
 import apiService from '../config/apiService'
 
 interface LoginProps {
@@ -41,37 +52,82 @@ const Login = ({ onLogin }: LoginProps) => {
   }
 
   return (
-    <div className="auth-form">
-      <h2>Login</h2>
-      {error && <div className="error">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="50vh"
+      p={2}
+    >
+      <Paper elevation={4} sx={{ p: 4, maxWidth: 400, width: '100%' }}>
+        <Box display="flex" alignItems="center" justifyContent="center" mb={3}>
+          <LoginIcon sx={{ mr: 1, fontSize: 32, color: 'primary.main' }} />
+          <Typography variant="h4" component="h2" color="primary">
+            Login
+          </Typography>
+        </Box>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <TextField
+            fullWidth
+            margin="normal"
             id="email"
             name="email"
+            label="Email Address"
+            type="email"
             value={formData.email}
             onChange={handleChange}
             required
+            autoComplete="email"
+            autoFocus
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Email />
+                </InputAdornment>
+              ),
+            }}
           />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
+          
+          <TextField
+            fullWidth
+            margin="normal"
             id="password"
             name="password"
+            label="Password"
+            type="password"
             value={formData.password}
             onChange={handleChange}
             required
+            autoComplete="current-password"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Lock />
+                </InputAdornment>
+              ),
+            }}
           />
-        </div>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
-    </div>
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            disabled={loading}
+            sx={{ mt: 3, mb: 2, py: 1.5 }}
+            startIcon={loading ? <CircularProgress size={20} /> : <LoginIcon />}
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </Button>
+        </Box>
+      </Paper>
+    </Box>
   )
 }
 
