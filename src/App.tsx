@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import apiService from './config/apiService'
+import './config/testApi' // This will auto-test API connection in development
 import './App.css'
 import Dashboard from './components/Dashboard'
 import Signup from './components/Signup'

@@ -6,7 +6,15 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    open: true
+    open: true,
+    // Optional: Proxy API calls to avoid CORS in development
+    // proxy: {
+    //   '/api': {
+    //     target: 'http://localhost:3001',
+    //     changeOrigin: true,
+    //     secure: false,
+    //   }
+    // }
   },
   build: {
     outDir: 'dist',

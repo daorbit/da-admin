@@ -23,15 +23,31 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${config.API_BASE_URL}${endpoint}`, {
+      const url = `${config.API_BASE_URL}${endpoint}`
+      console.log('Making API request to:', url)
+      
+      const response = await fetch(url, {
         headers: this.getAuthHeaders(),
         ...options
       })
+
+      if (!response.ok) {
+        console.error('API response not ok:', response.status, response.statusText)
+      }
 
       const data = await response.json()
       return data
     } catch (error) {
       console.error('API request failed:', error)
+      
+      // Provide more specific error messages
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        return {
+          success: false,
+          message: 'Unable to connect to the API server. Please check your internet connection.'
+        }
+      }
+      
       return {
         success: false,
         message: 'Network error. Please check your connection and try again.'
