@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   Box,
   Paper,
@@ -15,12 +15,21 @@ import {
   Avatar,
   IconButton,
   Tooltip,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Grid,
+  TablePagination,
 } from '@mui/material'
 import {
   Person,
   AdminPanelSettings,
   Visibility,
   Email,
+  Search,
 } from '@mui/icons-material'
 import apiService from '../config/apiService'
 
@@ -40,6 +49,15 @@ const Users: React.FC = () => {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('')
+  const [roleFilter, setRoleFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('all')
+  
+  // Pagination states
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
 
   useEffect(() => {
     fetchUsers()
@@ -91,6 +109,38 @@ const Users: React.FC = () => {
     return role.toLowerCase() === 'admin' ? <AdminPanelSettings /> : <Person />
   }
 
+  // Filter users based on search term, role, and status
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      const matchesRole = roleFilter === 'all' || user.role.toLowerCase() === roleFilter.toLowerCase()
+      
+      const matchesStatus = statusFilter === 'all' || 
+                           (statusFilter === 'active' && user.isActive !== false) ||
+                           (statusFilter === 'inactive' && user.isActive === false)
+      
+      return matchesSearch && matchesRole && matchesStatus
+    })
+  }, [users, searchTerm, roleFilter, statusFilter])
+
+  // Get paginated users
+  const paginatedUsers = useMemo(() => {
+    const startIndex = page * rowsPerPage
+    return filteredUsers.slice(startIndex, startIndex + rowsPerPage)
+  }, [filteredUsers, page, rowsPerPage])
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage)
+    console.log(event)
+  }
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -116,10 +166,61 @@ const Users: React.FC = () => {
         Users Management
       </Typography>
 
+      {/* Filter Controls */}
+      <Paper elevation={1} sx={{ mb: 2, p: 2 }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid sx={{ xs: 12, sm: 6, md: 4 }} >
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          <Grid sx={{ xs: 12, sm: 6, md: 4 }} >
+            <FormControl fullWidth size="small">
+              <InputLabel>Role</InputLabel>
+              <Select
+                value={roleFilter}
+                label="Role"
+                onChange={(e) => setRoleFilter(e.target.value)}
+              >
+                <MenuItem value="all">All Roles</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
+                <MenuItem value="moderator">Moderator</MenuItem>
+                <MenuItem value="user">User</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid sx={{ xs: 12, sm: 6, md: 4 }} >
+            <FormControl fullWidth size="small">
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={statusFilter}
+                label="Status"
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <MenuItem value="all">All Status</MenuItem>
+                <MenuItem value="active">Active</MenuItem>
+                <MenuItem value="inactive">Inactive</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+      </Paper>
+
       <Paper elevation={2}>
         <Box p={2} borderBottom={1} borderColor="divider">
           <Typography variant="h6" color="text.secondary">
-            Total Users: {users.length}
+            Showing {filteredUsers.length} of {users.length} users
           </Typography>
         </Box>
 
@@ -136,7 +237,7 @@ const Users: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map((user) => (
+              {paginatedUsers.map((user) => (
                 <TableRow key={user._id} hover>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={2}>
@@ -196,12 +297,24 @@ const Users: React.FC = () => {
           </Table>
         </TableContainer>
 
-        {users.length === 0 && (
+        {filteredUsers.length === 0 && (
           <Box p={4} textAlign="center">
             <Typography variant="body1" color="text.secondary">
-              No users found
+              {users.length === 0 ? 'No users found' : 'No users match the current filters'}
             </Typography>
           </Box>
+        )}
+
+        {filteredUsers.length > 0 && (
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            component="div"
+            count={filteredUsers.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         )}
       </Paper>
     </Box>
