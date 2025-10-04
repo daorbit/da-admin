@@ -8,6 +8,8 @@ const config = {
     login: '/api/auth/login',
     register: '/api/auth/register',
     me: '/api/auth/me',
+    users: '/api/users',
+    leads: '/api/leads',
   }
 }
 

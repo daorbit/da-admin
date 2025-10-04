@@ -78,13 +78,13 @@ class ApiService {
 
   // Users methods
   async getAllUsers(): Promise<ApiResponse> {
-    return this.request('/users', {
+    return this.request('/api/users', {
       method: 'GET'
     })
   }
 
   async getUserById(id: string): Promise<ApiResponse> {
-    return this.request(`/users/${id}`, {
+    return this.request(`/api/users/${id}`, {
       method: 'GET'
     })
   }
