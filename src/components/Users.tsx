@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Paper,
@@ -23,130 +23,118 @@ import {
   MenuItem,
   Grid,
   TablePagination,
-} from '@mui/material'
+  Button,
+} from "@mui/material";
 import {
   Person,
   AdminPanelSettings,
   Visibility,
   Email,
   Search,
-} from '@mui/icons-material'
-import apiService from '../config/apiService'
-
-interface User {
-  _id: string
-  name: string
-  email: string
-  role: string
-  createdAt: string
-  lastLogin?: string
-  isActive?: boolean
-}
-
-
+  Refresh,
+} from "@mui/icons-material";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { fetchUsers, clearError, User } from "../store/slices/usersSlice";
 
 const Users: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  
+  const dispatch = useAppDispatch();
+  const { users, loading, error } = useAppSelector((state) => state.users);
+
   // Filter states
-  const [searchTerm, setSearchTerm] = useState('')
-  const [roleFilter, setRoleFilter] = useState('all')
-  const [statusFilter, setStatusFilter] = useState('all')
-  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+
   // Pagination states
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await apiService.getAllUsers()
-      
-      if (response.success && response.data?.users) {
-        setUsers(response.data.users)
-      } else {
-        setError(response.message || 'Failed to fetch users')
-      }
-    } catch (err) {
-      setError('Error fetching users')
-      console.error('Error fetching users:', err)
-    } finally {
-      setLoading(false)
+    if (users.length === 0) {
+      dispatch(fetchUsers());
     }
-  }
+  }, [dispatch, users.length]);
+
+  const handleRefresh = () => {
+    dispatch(clearError());
+    dispatch(fetchUsers());
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   const getRoleColor = (role: string) => {
     switch (role.toLowerCase()) {
-      case 'admin':
-        return 'error'
-      case 'moderator':
-        return 'warning'
-      case 'user':
-        return 'primary'
+      case "admin":
+        return "error";
+      case "moderator":
+        return "warning";
+      case "user":
+        return "primary";
       default:
-        return 'default'
+        return "default";
     }
-  }
+  };
 
   const getRoleIcon = (role: string) => {
-    return role.toLowerCase() === 'admin' ? <AdminPanelSettings /> : <Person />
-  }
+    return role.toLowerCase() === "admin" ? <AdminPanelSettings /> : <Person />;
+  };
 
   // Filter users based on search term, role, and status
   const filteredUsers = useMemo(() => {
-    return users.filter(user => {
-      const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      
-      const matchesRole = roleFilter === 'all' || user.role.toLowerCase() === roleFilter.toLowerCase()
-      
-      const matchesStatus = statusFilter === 'all' || 
-                           (statusFilter === 'active' && user.isActive !== false) ||
-                           (statusFilter === 'inactive' && user.isActive === false)
-      
-      return matchesSearch && matchesRole && matchesStatus
-    })
-  }, [users, searchTerm, roleFilter, statusFilter])
+    return users.filter((user: User) => {
+      const matchesSearch =
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesRole =
+        roleFilter === "all" ||
+        user.role.toLowerCase() === roleFilter.toLowerCase();
+
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && user.isActive !== false) ||
+        (statusFilter === "inactive" && user.isActive === false);
+
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+  }, [users, searchTerm, roleFilter, statusFilter]);
 
   // Get paginated users
   const paginatedUsers = useMemo(() => {
-    const startIndex = page * rowsPerPage
-    return filteredUsers.slice(startIndex, startIndex + rowsPerPage)
-  }, [filteredUsers, page, rowsPerPage])
+    const startIndex = page * rowsPerPage;
+    return filteredUsers.slice(startIndex, startIndex + rowsPerPage);
+  }, [filteredUsers, page, rowsPerPage]);
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage)
-    console.log(event)
-  }
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
-  }
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="400px"
+      >
         <CircularProgress />
       </Box>
-    )
+    );
   }
 
   if (error) {
@@ -156,20 +144,40 @@ const Users: React.FC = () => {
           {error}
         </Alert>
       </Box>
-    )
+    );
   }
 
   return (
     <Box p={3}>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Person />
-        Users Management
-      </Typography>
+      <Box
+        sx={{
+          mb: 3,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+        >
+          <Person />
+          Users Management
+        </Typography>
+        <Button
+          variant="outlined"
+          startIcon={<Refresh />}
+          onClick={handleRefresh}
+          disabled={loading}
+        >
+          Refresh
+        </Button>
+      </Box>
 
       {/* Filter Controls */}
       <Paper elevation={1} sx={{ mb: 2, p: 2 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid sx={{ xs: 12, sm: 6, md: 4 }} >
+          <Grid sx={{ xs: 12, sm: 6, md: 4 }}>
             <TextField
               fullWidth
               size="small"
@@ -185,7 +193,7 @@ const Users: React.FC = () => {
               }}
             />
           </Grid>
-          <Grid sx={{ xs: 12, sm: 6, md: 4 }} >
+          <Grid sx={{ xs: 12, sm: 6, md: 4 }}>
             <FormControl fullWidth size="small">
               <InputLabel>Role</InputLabel>
               <Select
@@ -200,7 +208,7 @@ const Users: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid sx={{ xs: 12, sm: 6, md: 4 }} >
+          <Grid sx={{ xs: 12, sm: 6, md: 4 }}>
             <FormControl fullWidth size="small">
               <InputLabel>Status</InputLabel>
               <Select
@@ -237,11 +245,11 @@ const Users: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedUsers.map((user) => (
+              {paginatedUsers.map((user: User) => (
                 <TableRow key={user._id} hover>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={2}>
-                      <Avatar sx={{ bgcolor: 'primary.main' }}>
+                      <Avatar sx={{ bgcolor: "primary.main" }}>
                         {user.name.charAt(0).toUpperCase()}
                       </Avatar>
                       <Box>
@@ -257,7 +265,9 @@ const Users: React.FC = () => {
                   <TableCell>
                     <Chip
                       icon={getRoleIcon(user.role)}
-                      label={user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      label={
+                        user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                      }
                       color={getRoleColor(user.role) as any}
                       size="small"
                     />
@@ -268,14 +278,17 @@ const Users: React.FC = () => {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" color={user.lastLogin ? 'text.primary' : 'text.secondary'}>
-                      {user.lastLogin ? formatDate(user.lastLogin) : 'Never'}
+                    <Typography
+                      variant="body2"
+                      color={user.lastLogin ? "text.primary" : "text.secondary"}
+                    >
+                      {user.lastLogin ? formatDate(user.lastLogin) : "Never"}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={user.isActive !== false ? 'Active' : 'Inactive'}
-                      color={user.isActive !== false ? 'success' : 'default'}
+                      label={user.isActive !== false ? "Active" : "Inactive"}
+                      color={user.isActive !== false ? "success" : "default"}
                       size="small"
                     />
                   </TableCell>
@@ -300,7 +313,9 @@ const Users: React.FC = () => {
         {filteredUsers.length === 0 && (
           <Box p={4} textAlign="center">
             <Typography variant="body1" color="text.secondary">
-              {users.length === 0 ? 'No users found' : 'No users match the current filters'}
+              {users.length === 0
+                ? "No users found"
+                : "No users match the current filters"}
             </Typography>
           </Box>
         )}
@@ -318,7 +333,7 @@ const Users: React.FC = () => {
         )}
       </Paper>
     </Box>
-  )
-}
+  );
+};
 
-export default Users
+export default Users;

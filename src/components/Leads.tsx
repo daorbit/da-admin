@@ -36,121 +36,49 @@ import {
   CalendarToday,
   Search,
   FilterList,
+  Refresh,
 } from '@mui/icons-material'
-import config from '../config/api'
-
-interface Lead {
-  _id: string
-  name: string
-  email: string
-  company: string
-  message: string
-  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'closed'
-  source: string
-  createdAt: string
-  formattedDate: string
-}
-
-
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { fetchLeads, updateLeadStatus, clearError, Lead } from '../store/slices/leadsSlice'
 
 const Leads: React.FC = () => {
-  const [leads, setLeads] = useState<Lead[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const dispatch = useAppDispatch()
+  const { leads, loading, error, pagination, stats } = useAppSelector((state) => state.leads)
+  
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [statusFilter, setStatusFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [page, setPage] = useState(1)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    pages: 0
-  })
-  const [stats, setStats] = useState({
-    total: 0,
-    new: 0,
-    contacted: 0,
-    qualified: 0,
-    converted: 0,
-    closed: 0
-  })
-
-  const fetchLeads = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '10',
-        ...(statusFilter !== 'all' && { status: statusFilter }),
-        ...(searchTerm && { search: searchTerm })
-      })
-
-      const response = await fetch(`${config.API_BASE_URL}/api/leads?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        setLeads(data.data.leads)
-        setPagination(data.data.pagination)
-        setStats(data.data.stats)
-      } else {
-        setError(data.message || 'Failed to fetch leads')
-      }
-    } catch (err) {
-      console.error('Error fetching leads:', err)
-      setError('Failed to connect to server')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const updateLeadStatus = async (leadId: string, newStatus: string) => {
-    try {
-      const response = await fetch(`${config.API_BASE_URL}/api/leads/${leadId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status: newStatus })
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        // Update the lead in the local state
-        setLeads(prevLeads =>
-          prevLeads.map(lead =>
-            lead._id === leadId ? { ...lead, status: newStatus as any } : lead
-          )
-        )
-        // Update selected lead if it's the one being updated
-        if (selectedLead && selectedLead._id === leadId) {
-          setSelectedLead({ ...selectedLead, status: newStatus as any })
-        }
-        // Refresh to get updated stats
-        fetchLeads()
-      } else {
-        setError(data.message || 'Failed to update lead status')
-      }
-    } catch (err) {
-      console.error('Error updating lead status:', err)
-      setError('Failed to update lead status')
-    }
-  }
 
   useEffect(() => {
-    fetchLeads()
-  }, [page, statusFilter, searchTerm])
+    dispatch(fetchLeads({
+      page,
+      limit: 10,
+      status: statusFilter,
+      search: searchTerm
+    }))
+  }, [dispatch, page, statusFilter, searchTerm])
+
+  const handleRefresh = () => {
+    dispatch(clearError())
+    dispatch(fetchLeads({
+      page,
+      limit: 10,
+      status: statusFilter,
+      search: searchTerm
+    }))
+  }
+
+  const handleUpdateLeadStatus = async (leadId: string, newStatus: string) => {
+    await dispatch(updateLeadStatus({ leadId, status: newStatus }))
+    // Update selected lead if it's the one being updated
+    if (selectedLead && selectedLead._id === leadId) {
+      setSelectedLead({ ...selectedLead, status: newStatus as Lead['status'] })
+    }
+    // Refresh to get updated stats
+    handleRefresh()
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -197,9 +125,19 @@ const Leads: React.FC = () => {
 
   return (
     <Box p={3}>
-      <Typography variant="h4" gutterBottom>
-        Leads Management
-      </Typography>
+      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Typography variant="h4">
+          Leads Management
+        </Typography>
+        <Button
+          variant="outlined"
+          startIcon={<Refresh />}
+          onClick={handleRefresh}
+          disabled={loading}
+        >
+          Refresh
+        </Button>
+      </Box>
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
@@ -296,7 +234,7 @@ const Leads: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {leads.map((lead) => (
+              {leads.map((lead: Lead) => (
                 <TableRow key={lead._id} hover>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
@@ -320,7 +258,7 @@ const Leads: React.FC = () => {
                     <FormControl size="small" sx={{ minWidth: 120 }}>
                       <Select
                         value={lead.status}
-                        onChange={(e) => updateLeadStatus(lead._id, e.target.value)}
+                        onChange={(e) => handleUpdateLeadStatus(lead._id, e.target.value)}
                         variant="outlined"
                         size="small"
                       >
