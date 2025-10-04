@@ -147,8 +147,8 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
           }}
         >
           <Tab icon={<DashboardIcon />} label="Dashboard" />
-          <Tab icon={<People />} label="Users" />
-          <Tab icon={<Email />} label="Leads" />
+          {user?.role === "admin" && <Tab icon={<People />} label="Users" />}
+          {user?.role === "admin" && <Tab icon={<Email />} label="Leads" />}
           <Tab icon={<Analytics />} label="Analytics" />
           <Tab icon={<Settings />} label="Settings" />
         </Tabs>
@@ -208,20 +208,22 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
 
           {/* Feature Cards */}
           <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-            Admin Features
+            {user?.role === "admin" ? "Admin Features" : "Available Features"}
           </Typography>
           <Box display="flex" flexWrap="wrap" gap={3}>
-            <Card elevation={2} sx={{ minWidth: 280, flex: "1 1 280px" }}>
-              <CardContent>
-                <Box display="flex" alignItems="center" gap={2} mb={2}>
-                  <People color="primary" />
-                  <Typography variant="h6">User Management</Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  Manage users and their permissions
-                </Typography>
-              </CardContent>
-            </Card>
+            {user?.role === "admin" && (
+              <Card elevation={2} sx={{ minWidth: 280, flex: "1 1 280px" }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" gap={2} mb={2}>
+                    <People color="primary" />
+                    <Typography variant="h6">User Management</Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Manage users and their permissions
+                  </Typography>
+                </CardContent>
+              </Card>
+            )}
             <Card elevation={2} sx={{ minWidth: 280, flex: "1 1 280px" }}>
               <CardContent>
                 <Box display="flex" alignItems="center" gap={2} mb={2}>
@@ -248,15 +250,19 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
         </Box>
       </TabPanel>
 
-      <TabPanel value={tabValue} index={1}>
-        <Users />
-      </TabPanel>
+      {user?.role === "admin" && (
+        <TabPanel value={tabValue} index={1}>
+          <Users />
+        </TabPanel>
+      )}
 
-      <TabPanel value={tabValue} index={2}>
-        <Leads />
-      </TabPanel>
+      {user?.role === "admin" && (
+        <TabPanel value={tabValue} index={2}>
+          <Leads />
+        </TabPanel>
+      )}
 
-      <TabPanel value={tabValue} index={3}>
+      <TabPanel value={tabValue} index={user?.role === "admin" ? 3 : 1}>
         <Box p={3}>
           <Typography variant="h4" gutterBottom>
             Analytics
@@ -267,7 +273,7 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
         </Box>
       </TabPanel>
 
-      <TabPanel value={tabValue} index={4}>
+      <TabPanel value={tabValue} index={user?.role === "admin" ? 4 : 2}>
         <Box p={3}>
           <Typography variant="h4" gutterBottom>
             Settings
