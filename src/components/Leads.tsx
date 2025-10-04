@@ -125,8 +125,20 @@ const Leads: React.FC = () => {
 
   return (
     <Box p={3}>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography variant="h4">
+      <Box 
+        sx={{ 
+          mb: 3, 
+          display: 'flex', 
+          alignItems: { xs: 'stretch', sm: 'center' }, 
+          justifyContent: 'space-between',
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: { xs: 2, sm: 0 }
+        }}
+      >
+        <Typography 
+          variant="h4"
+          sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}
+        >
           Leads Management
         </Typography>
         <Button
@@ -134,6 +146,7 @@ const Leads: React.FC = () => {
           startIcon={<Refresh />}
           onClick={handleRefresh}
           disabled={loading}
+          sx={{ alignSelf: { xs: 'flex-start', sm: 'auto' } }}
         >
           Refresh
         </Button>
@@ -146,43 +159,85 @@ const Leads: React.FC = () => {
       )}
 
       {/* Stats Cards */}
-      <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
-        <Card elevation={2} sx={{ minWidth: 120, flex: '1 1 120px' }}>
-          <CardContent sx={{ textAlign: 'center', py: 2 }}>
-            <Typography variant="h4" color="primary">
+      <Box 
+        sx={{
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: { xs: 1, sm: 2 }, 
+          mb: 3,
+          '& > *': {
+            flex: { xs: '1 1 calc(50% - 4px)', sm: '1 1 120px' }
+          }
+        }}
+      >
+        <Card elevation={2} sx={{ minWidth: { xs: 100, sm: 120 } }}>
+          <CardContent sx={{ textAlign: 'center', py: { xs: 1.5, sm: 2 } }}>
+            <Typography 
+              variant="h4" 
+              color="primary"
+              sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}
+            >
               {stats.total || 0}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+            >
               Total Leads
             </Typography>
           </CardContent>
         </Card>
-        <Card elevation={2} sx={{ minWidth: 120, flex: '1 1 120px' }}>
-          <CardContent sx={{ textAlign: 'center', py: 2 }}>
-            <Typography variant="h4" color="info.main">
+        <Card elevation={2} sx={{ minWidth: { xs: 100, sm: 120 } }}>
+          <CardContent sx={{ textAlign: 'center', py: { xs: 1.5, sm: 2 } }}>
+            <Typography 
+              variant="h4" 
+              color="info.main"
+              sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}
+            >
               {stats.new || 0}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+            >
               New
             </Typography>
           </CardContent>
         </Card>
-        <Card elevation={2} sx={{ minWidth: 120, flex: '1 1 120px' }}>
-          <CardContent sx={{ textAlign: 'center', py: 2 }}>
-            <Typography variant="h4" color="warning.main">
+        <Card elevation={2} sx={{ minWidth: { xs: 100, sm: 120 } }}>
+          <CardContent sx={{ textAlign: 'center', py: { xs: 1.5, sm: 2 } }}>
+            <Typography 
+              variant="h4" 
+              color="warning.main"
+              sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}
+            >
               {stats.contacted || 0}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+            >
               Contacted
             </Typography>
           </CardContent>
         </Card>
-        <Card elevation={2} sx={{ minWidth: 120, flex: '1 1 120px' }}>
-          <CardContent sx={{ textAlign: 'center', py: 2 }}>
-            <Typography variant="h4" color="success.main">
+        <Card elevation={2} sx={{ minWidth: { xs: 100, sm: 120 } }}>
+          <CardContent sx={{ textAlign: 'center', py: { xs: 1.5, sm: 2 } }}>
+            <Typography 
+              variant="h4" 
+              color="success.main"
+              sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}
+            >
               {stats.converted || 0}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+            >
               Converted
             </Typography>
           </CardContent>
@@ -190,7 +245,15 @@ const Leads: React.FC = () => {
       </Box>
 
       {/* Filters */}
-      <Box display="flex" gap={2} mb={3} flexWrap="wrap">
+      <Box 
+        sx={{
+          display: 'flex', 
+          gap: 2, 
+          mb: 3, 
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'center' }
+        }}
+      >
         <TextField
           size="small"
           placeholder="Search leads..."
@@ -199,9 +262,18 @@ const Leads: React.FC = () => {
           InputProps={{
             startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />
           }}
-          sx={{ minWidth: 200 }}
+          sx={{ 
+            minWidth: { xs: 'auto', sm: 200 },
+            flex: { xs: '1', sm: '0 1 300px' }
+          }}
         />
-        <FormControl size="small" sx={{ minWidth: 150 }}>
+        <FormControl 
+          size="small" 
+          sx={{ 
+            minWidth: { xs: 'auto', sm: 150 },
+            flex: { xs: '1', sm: '0 1 200px' }
+          }}
+        >
           <InputLabel>Status Filter</InputLabel>
           <Select
             value={statusFilter}
@@ -221,46 +293,83 @@ const Leads: React.FC = () => {
 
       {/* Leads Table */}
       <Card elevation={2}>
-        <TableContainer component={Paper}>
-          <Table>
+        <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: 700 }}>
             <TableHead>
               <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Company</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell align="center">Actions</TableCell>
+                <TableCell sx={{ minWidth: 150 }}>Name</TableCell>
+                <TableCell sx={{ minWidth: 180 }}>Email</TableCell>
+                <TableCell sx={{ minWidth: 120 }}>Company</TableCell>
+                <TableCell sx={{ minWidth: 130 }}>Status</TableCell>
+                <TableCell sx={{ minWidth: 100 }}>Date</TableCell>
+                <TableCell align="center" sx={{ minWidth: 80 }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {leads.map((lead: Lead) => (
                 <TableRow key={lead._id} hover>
-                  <TableCell>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Person fontSize="small" color="action" />
-                      {lead.name}
+                  <TableCell sx={{ minWidth: 150 }}>
+                    <Box display="flex" alignItems="center" gap={{ xs: 0.5, sm: 1 }}>
+                      <Person 
+                        fontSize="small" 
+                        color="action" 
+                        sx={{ display: { xs: 'none', sm: 'block' } }} 
+                      />
+                      <Typography 
+                        variant="body2"
+                        sx={{ 
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                          wordBreak: 'break-word'
+                        }}
+                      >
+                        {lead.name}
+                      </Typography>
                     </Box>
                   </TableCell>
-                  <TableCell>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Email fontSize="small" color="action" />
-                      {lead.email}
+                  <TableCell sx={{ minWidth: 180 }}>
+                    <Box display="flex" alignItems="center" gap={{ xs: 0.5, sm: 1 }}>
+                      <Email 
+                        fontSize="small" 
+                        color="action" 
+                        sx={{ display: { xs: 'none', sm: 'block' } }} 
+                      />
+                      <Typography 
+                        variant="body2"
+                        sx={{ 
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                          wordBreak: 'break-all'
+                        }}
+                      >
+                        {lead.email}
+                      </Typography>
                     </Box>
                   </TableCell>
-                  <TableCell>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Business fontSize="small" color="action" />
-                      {lead.company || 'N/A'}
+                  <TableCell sx={{ minWidth: 120 }}>
+                    <Box display="flex" alignItems="center" gap={{ xs: 0.5, sm: 1 }}>
+                      <Business 
+                        fontSize="small" 
+                        color="action" 
+                        sx={{ display: { xs: 'none', sm: 'block' } }} 
+                      />
+                      <Typography 
+                        variant="body2"
+                        sx={{ 
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                          wordBreak: 'break-word'
+                        }}
+                      >
+                        {lead.company || 'N/A'}
+                      </Typography>
                     </Box>
                   </TableCell>
-                  <TableCell>
-                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <TableCell sx={{ minWidth: 130 }}>
+                    <FormControl size="small" sx={{ minWidth: { xs: 100, sm: 120 } }}>
                       <Select
                         value={lead.status}
                         onChange={(e) => handleUpdateLeadStatus(lead._id, e.target.value)}
                         variant="outlined"
                         size="small"
+                        sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
                       >
                         <MenuItem value="new">New</MenuItem>
                         <MenuItem value="contacted">Contacted</MenuItem>
@@ -270,20 +379,30 @@ const Leads: React.FC = () => {
                       </Select>
                     </FormControl>
                   </TableCell>
-                  <TableCell>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <CalendarToday fontSize="small" color="action" />
-                      {new Date(lead.createdAt).toLocaleDateString()}
+                  <TableCell sx={{ minWidth: 100 }}>
+                    <Box display="flex" alignItems="center" gap={{ xs: 0.5, sm: 1 }}>
+                      <CalendarToday 
+                        fontSize="small" 
+                        color="action" 
+                        sx={{ display: { xs: 'none', sm: 'block' } }} 
+                      />
+                      <Typography 
+                        variant="body2"
+                        sx={{ fontSize: { xs: '0.6875rem', sm: '0.875rem' } }}
+                      >
+                        {new Date(lead.createdAt).toLocaleDateString()}
+                      </Typography>
                     </Box>
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell align="center" sx={{ minWidth: 80 }}>
                     <Tooltip title="View Details">
                       <IconButton
                         size="small"
                         onClick={() => handleViewLead(lead)}
                         color="primary"
+                        sx={{ padding: { xs: '4px', sm: '8px' } }}
                       >
-                        <Visibility />
+                        <Visibility sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }} />
                       </IconButton>
                     </Tooltip>
                   </TableCell>
@@ -304,12 +423,25 @@ const Leads: React.FC = () => {
 
         {/* Pagination */}
         {pagination.pages > 1 && (
-          <Box display="flex" justifyContent="center" p={2}>
+          <Box 
+            display="flex" 
+            justifyContent="center" 
+            p={2}
+            sx={{
+              '& .MuiPagination-ul': {
+                flexWrap: 'wrap',
+                justifyContent: 'center'
+              }
+            }}
+          >
             <Pagination
               count={pagination.pages}
               page={page}
               onChange={handlePageChange}
               color="primary"
+              size={window.innerWidth < 600 ? 'small' : 'medium'}
+              siblingCount={window.innerWidth < 600 ? 0 : 1}
+              boundaryCount={window.innerWidth < 600 ? 1 : 2}
             />
           </Box>
         )}
@@ -321,68 +453,164 @@ const Leads: React.FC = () => {
         onClose={handleCloseDialog}
         maxWidth="md"
         fullWidth
+        fullScreen={window.innerWidth < 600}
+        sx={{
+          '& .MuiDialog-paper': {
+            margin: { xs: 1, sm: 2 },
+            maxHeight: { xs: '100vh', sm: 'calc(100% - 64px)' }
+          }
+        }}
       >
-        <DialogTitle>
+        <DialogTitle sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
           Lead Details
         </DialogTitle>
         <DialogContent>
           {selectedLead && (
             <Box>
-              <Box display="flex" gap={2} mb={3} flexWrap="wrap">
-                <Card elevation={1} sx={{ flex: '1 1 200px', p: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              <Box 
+                sx={{
+                  display: 'flex', 
+                  gap: { xs: 1, sm: 2 }, 
+                  mb: 3, 
+                  flexDirection: { xs: 'column', sm: 'row' }
+                }}
+              >
+                <Card elevation={1} sx={{ flex: '1', p: { xs: 1.5, sm: 2 } }}>
+                  <Typography 
+                    variant="subtitle2" 
+                    color="text.secondary" 
+                    gutterBottom
+                    sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                  >
                     Name
                   </Typography>
-                  <Typography variant="body1">{selectedLead.name}</Typography>
+                  <Typography 
+                    variant="body1"
+                    sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+                  >
+                    {selectedLead.name}
+                  </Typography>
                 </Card>
-                <Card elevation={1} sx={{ flex: '1 1 200px', p: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                <Card elevation={1} sx={{ flex: '1', p: { xs: 1.5, sm: 2 } }}>
+                  <Typography 
+                    variant="subtitle2" 
+                    color="text.secondary" 
+                    gutterBottom
+                    sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                  >
                     Email
                   </Typography>
-                  <Typography variant="body1">{selectedLead.email}</Typography>
+                  <Typography 
+                    variant="body1"
+                    sx={{ 
+                      fontSize: { xs: '0.875rem', sm: '1rem' },
+                      wordBreak: 'break-all'
+                    }}
+                  >
+                    {selectedLead.email}
+                  </Typography>
                 </Card>
               </Box>
               
-              <Box display="flex" gap={2} mb={3} flexWrap="wrap">
-                <Card elevation={1} sx={{ flex: '1 1 200px', p: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              <Box 
+                sx={{
+                  display: 'flex', 
+                  gap: { xs: 1, sm: 2 }, 
+                  mb: 3, 
+                  flexDirection: { xs: 'column', sm: 'row' }
+                }}
+              >
+                <Card elevation={1} sx={{ flex: '1', p: { xs: 1.5, sm: 2 } }}>
+                  <Typography 
+                    variant="subtitle2" 
+                    color="text.secondary" 
+                    gutterBottom
+                    sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                  >
                     Company
                   </Typography>
-                  <Typography variant="body1">{selectedLead.company || 'N/A'}</Typography>
+                  <Typography 
+                    variant="body1"
+                    sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+                  >
+                    {selectedLead.company || 'N/A'}
+                  </Typography>
                 </Card>
-                <Card elevation={1} sx={{ flex: '1 1 200px', p: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                <Card elevation={1} sx={{ flex: '1', p: { xs: 1.5, sm: 2 } }}>
+                  <Typography 
+                    variant="subtitle2" 
+                    color="text.secondary" 
+                    gutterBottom
+                    sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                  >
                     Status
                   </Typography>
                   <Chip
                     label={selectedLead.status.charAt(0).toUpperCase() + selectedLead.status.slice(1)}
                     color={getStatusColor(selectedLead.status) as any}
                     size="small"
+                    sx={{ fontSize: { xs: '0.6875rem', sm: '0.75rem' } }}
                   />
                 </Card>
               </Box>
 
-              <Card elevation={1} sx={{ p: 2, mb: 3 }}>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              <Card elevation={1} sx={{ p: { xs: 1.5, sm: 2 }, mb: 3 }}>
+                <Typography 
+                  variant="subtitle2" 
+                  color="text.secondary" 
+                  gutterBottom
+                  sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                >
                   Message
                 </Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    whiteSpace: 'pre-wrap',
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                    lineHeight: 1.5
+                  }}
+                >
                   {selectedLead.message}
                 </Typography>
               </Card>
 
-              <Box display="flex" gap={2} flexWrap="wrap">
-                <Card elevation={1} sx={{ flex: '1 1 200px', p: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              <Box 
+                sx={{
+                  display: 'flex', 
+                  gap: { xs: 1, sm: 2 }, 
+                  flexDirection: { xs: 'column', sm: 'row' }
+                }}
+              >
+                <Card elevation={1} sx={{ flex: '1', p: { xs: 1.5, sm: 2 } }}>
+                  <Typography 
+                    variant="subtitle2" 
+                    color="text.secondary" 
+                    gutterBottom
+                    sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                  >
                     Source
                   </Typography>
-                  <Typography variant="body1">{selectedLead.source}</Typography>
+                  <Typography 
+                    variant="body1"
+                    sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+                  >
+                    {selectedLead.source}
+                  </Typography>
                 </Card>
-                <Card elevation={1} sx={{ flex: '1 1 200px', p: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                <Card elevation={1} sx={{ flex: '1', p: { xs: 1.5, sm: 2 } }}>
+                  <Typography 
+                    variant="subtitle2" 
+                    color="text.secondary" 
+                    gutterBottom
+                    sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                  >
                     Submitted
                   </Typography>
-                  <Typography variant="body1">
+                  <Typography 
+                    variant="body1"
+                    sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+                  >
                     {new Date(selectedLead.createdAt).toLocaleString()}
                   </Typography>
                 </Card>
@@ -390,8 +618,13 @@ const Leads: React.FC = () => {
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Close</Button>
+        <DialogActions sx={{ p: { xs: 2, sm: 2 } }}>
+          <Button 
+            onClick={handleCloseDialog}
+            sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+          >
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
