@@ -9,7 +9,7 @@
 
 /* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
-  width: 6px;
+  display: none;
 }
 
 ::-webkit-scrollbar-track {

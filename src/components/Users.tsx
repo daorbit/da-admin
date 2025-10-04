@@ -21,7 +21,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid,
   TablePagination,
   Button,
 } from "@mui/material";
@@ -176,8 +175,15 @@ const Users: React.FC = () => {
 
       {/* Filter Controls */}
       <Paper elevation={1} sx={{ mb: 2, p: 2 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid sx={{ xs: 12, sm: 6, md: 4 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 2,
+            alignItems: { xs: "stretch", md: "center" },
+          }}
+        >
+          <Box sx={{ flex: { xs: "1 1 auto", md: "1 1 300px" } }}>
             <TextField
               fullWidth
               size="small"
@@ -192,8 +198,8 @@ const Users: React.FC = () => {
                 ),
               }}
             />
-          </Grid>
-          <Grid sx={{ xs: 12, sm: 6, md: 4 }}>
+          </Box>
+          <Box sx={{ flex: { xs: "1 1 auto", md: "0 1 200px" } }}>
             <FormControl fullWidth size="small">
               <InputLabel>Role</InputLabel>
               <Select
@@ -207,8 +213,8 @@ const Users: React.FC = () => {
                 <MenuItem value="user">User</MenuItem>
               </Select>
             </FormControl>
-          </Grid>
-          <Grid sx={{ xs: 12, sm: 6, md: 4 }}>
+          </Box>
+          <Box sx={{ flex: { xs: "1 1 auto", md: "0 1 200px" } }}>
             <FormControl fullWidth size="small">
               <InputLabel>Status</InputLabel>
               <Select
@@ -221,8 +227,8 @@ const Users: React.FC = () => {
                 <MenuItem value="inactive">Inactive</MenuItem>
               </Select>
             </FormControl>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Paper>
 
       <Paper elevation={2}>
@@ -232,37 +238,60 @@ const Users: React.FC = () => {
           </Typography>
         </Box>
 
-        <TableContainer>
-          <Table>
+        <TableContainer sx={{ overflowX: "auto" }}>
+          <Table sx={{ minWidth: 800 }}>
             <TableHead>
               <TableRow>
-                <TableCell>User</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell>Created</TableCell>
-                <TableCell>Last Login</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="center">Actions</TableCell>
+                <TableCell sx={{ minWidth: 200 }}>User</TableCell>
+                <TableCell sx={{ minWidth: 100 }}>Role</TableCell>
+                <TableCell sx={{ minWidth: 120 }}>Created</TableCell>
+                <TableCell sx={{ minWidth: 120 }}>Last Login</TableCell>
+                <TableCell sx={{ minWidth: 80 }}>Status</TableCell>
+                <TableCell align="center" sx={{ minWidth: 100 }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {paginatedUsers.map((user: User) => (
                 <TableRow key={user._id} hover>
-                  <TableCell>
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Avatar sx={{ bgcolor: "primary.main" }}>
+                  <TableCell sx={{ minWidth: 200 }}>
+                    <Box display="flex" alignItems="center" gap={{ xs: 1, sm: 2 }}>
+                      <Avatar 
+                        sx={{ 
+                          bgcolor: "primary.main",
+                          width: { xs: 32, sm: 40 },
+                          height: { xs: 32, sm: 40 },
+                          fontSize: { xs: "0.875rem", sm: "1.25rem" }
+                        }}
+                      >
                         {user.name.charAt(0).toUpperCase()}
                       </Avatar>
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight="medium">
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
+                        <Typography 
+                          variant="subtitle2" 
+                          fontWeight="medium"
+                          sx={{ 
+                            fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                            lineHeight: 1.2,
+                            wordBreak: "break-word"
+                          }}
+                        >
                           {user.name}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary"
+                          sx={{ 
+                            fontSize: { xs: "0.6875rem", sm: "0.75rem" },
+                            lineHeight: 1.2,
+                            wordBreak: "break-all"
+                          }}
+                        >
                           {user.email}
                         </Typography>
                       </Box>
                     </Box>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>
                     <Chip
                       icon={getRoleIcon(user.role)}
                       label={
@@ -270,39 +299,61 @@ const Users: React.FC = () => {
                       }
                       color={getRoleColor(user.role) as any}
                       size="small"
+                      sx={{ 
+                        fontSize: { xs: "0.625rem", sm: "0.75rem" },
+                        height: { xs: 20, sm: 24 }
+                      }}
                     />
                   </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
+                  <TableCell sx={{ minWidth: 120 }}>
+                    <Typography 
+                      variant="body2"
+                      sx={{ fontSize: { xs: "0.6875rem", sm: "0.875rem" } }}
+                    >
                       {formatDate(user.createdAt)}
                     </Typography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>
                     <Typography
                       variant="body2"
                       color={user.lastLogin ? "text.primary" : "text.secondary"}
+                      sx={{ fontSize: { xs: "0.6875rem", sm: "0.875rem" } }}
                     >
                       {user.lastLogin ? formatDate(user.lastLogin) : "Never"}
                     </Typography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ minWidth: 80 }}>
                     <Chip
                       label={user.isActive !== false ? "Active" : "Inactive"}
                       color={user.isActive !== false ? "success" : "default"}
                       size="small"
+                      sx={{ 
+                        fontSize: { xs: "0.625rem", sm: "0.75rem" },
+                        height: { xs: 20, sm: 24 }
+                      }}
                     />
                   </TableCell>
-                  <TableCell align="center">
-                    <Tooltip title="View Details">
-                      <IconButton size="small" color="primary">
-                        <Visibility />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Send Email">
-                      <IconButton size="small" color="secondary">
-                        <Email />
-                      </IconButton>
-                    </Tooltip>
+                  <TableCell align="center" sx={{ minWidth: 100 }}>
+                    <Box sx={{ display: "flex", justifyContent: "center", gap: { xs: 0.5, sm: 1 } }}>
+                      <Tooltip title="View Details">
+                        <IconButton 
+                          size="small" 
+                          color="primary"
+                          sx={{ padding: { xs: "4px", sm: "8px" } }}
+                        >
+                          <Visibility sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Send Email">
+                        <IconButton 
+                          size="small" 
+                          color="secondary"
+                          sx={{ padding: { xs: "4px", sm: "8px" } }}
+                        >
+                          <Email sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))}
