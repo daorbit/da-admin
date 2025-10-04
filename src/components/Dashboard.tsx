@@ -23,8 +23,10 @@ import {
   Logout,
   Person,
   AdminPanelSettings,
+  Email,
 } from '@mui/icons-material'
 import Users from './Users'
+import Leads from './Leads'
 
 interface DashboardProps {
   user: any
@@ -137,6 +139,7 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="dashboard tabs">
           <Tab icon={<DashboardIcon />} label="Dashboard" />
           <Tab icon={<People />} label="Users" />
+          <Tab icon={<Email />} label="Leads" />
           <Tab icon={<Analytics />} label="Analytics" />
           <Tab icon={<Settings />} label="Settings" />
         </Tabs>
@@ -230,6 +233,10 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
       </TabPanel>
 
       <TabPanel value={tabValue} index={2}>
+        <Leads />
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={3}>
         <Box p={3}>
           <Typography variant="h4" gutterBottom>
             Analytics
@@ -240,7 +247,7 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
         </Box>
       </TabPanel>
 
-      <TabPanel value={tabValue} index={3}>
+      <TabPanel value={tabValue} index={4}>
         <Box p={3}>
           <Typography variant="h4" gutterBottom>
             Settings
