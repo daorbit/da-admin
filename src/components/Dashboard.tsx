@@ -92,8 +92,7 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
       {/* Header */}
       <AppBar position="static" elevation={2}>
         <Toolbar>
-          <DashboardIcon sx={{ mr: 2 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             DA Admin Dashboard
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
