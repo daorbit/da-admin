@@ -5,7 +5,11 @@ import { CssBaseline, CircularProgress, Box } from '@mui/material'
 import apiService from './config/apiService'
 import './config/testApi' // This will auto-test API connection in development
 import './App.css'
-import Dashboard from './components/Dashboard'
+import DashboardLayout from './components/DashboardLayout'
+import DashboardOverview from './components/DashboardOverview'
+import Users from './components/Users'
+import Leads from './components/Leads'
+import Settings from './components/Settings'
 import LoginPage from './pages/LoginPage'
 import PasskeyVerificationPage from './pages/PasskeyVerificationPage'
 import SignupPage from './pages/SignupPage'
@@ -268,9 +272,14 @@ function App() {
         <Routes>
           {isAuthenticated ? (
             <>
-              <Route path="/" element={<Dashboard user={user} onLogout={handleLogout} />} />
-              <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="/dashboard" element={<DashboardLayout user={user} onLogout={handleLogout} />}>
+                <Route index element={<DashboardOverview user={user} />} />
+                <Route path="users" element={<Users />} />
+                <Route path="leads" element={<Leads />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </>
           ) : (
             <>

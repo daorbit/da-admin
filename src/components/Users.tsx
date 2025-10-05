@@ -28,12 +28,31 @@ import {
   Person,
   AdminPanelSettings,
   Visibility,
-  Email,
   Search,
   Refresh,
+  Edit,
+  Delete,
+  MoreVert,
 } from "@mui/icons-material";
+import {
+  Menu,
+  ListItemIcon,
+  ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Snackbar,
+} from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { fetchUsers, clearError, User } from "../store/slices/usersSlice";
+import { 
+  fetchUsers, 
+  clearError, 
+  updateUserRole, 
+  updateUserStatus, 
+  deleteUser,
+  User 
+} from "../store/slices/usersSlice";
 
 const Users: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -48,6 +67,19 @@ const Users: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  // Action menu states
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  
+  // Dialog states
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [newRole, setNewRole] = useState('');
+  
+  // Snackbar states
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+
   useEffect(() => {
     if (users.length === 0) {
       dispatch(fetchUsers());
@@ -57,6 +89,81 @@ const Users: React.FC = () => {
   const handleRefresh = () => {
     dispatch(clearError());
     dispatch(fetchUsers());
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, user: User) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedUser(user);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedUser(null);
+  };
+
+  const handleRoleChange = () => {
+    if (selectedUser) {
+      setNewRole(selectedUser.role);
+      setRoleDialogOpen(true);
+    }
+    handleMenuClose();
+  };
+
+  const handleRoleUpdate = async () => {
+    if (selectedUser && newRole !== selectedUser.role) {
+      try {
+        await dispatch(updateUserRole({ id: selectedUser._id, role: newRole })).unwrap();
+        setSnackbarMessage('User role updated successfully');
+        setSnackbarOpen(true);
+      } catch (error) {
+        setSnackbarMessage('Failed to update user role');
+        setSnackbarOpen(true);
+      }
+    }
+    setRoleDialogOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleStatusToggle = async () => {
+    if (selectedUser) {
+      try {
+        await dispatch(updateUserStatus({ 
+          id: selectedUser._id, 
+          isActive: !selectedUser.isActive 
+        })).unwrap();
+        setSnackbarMessage(`User ${!selectedUser.isActive ? 'activated' : 'deactivated'} successfully`);
+        setSnackbarOpen(true);
+      } catch (error) {
+        setSnackbarMessage('Failed to update user status');
+        setSnackbarOpen(true);
+      }
+    }
+    handleMenuClose();
+  };
+
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+    handleMenuClose();
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (selectedUser) {
+      try {
+        await dispatch(deleteUser(selectedUser._id)).unwrap();
+        setSnackbarMessage('User deleted successfully');
+        setSnackbarOpen(true);
+      } catch (error) {
+        setSnackbarMessage('Failed to delete user');
+        setSnackbarOpen(true);
+      }
+    }
+    setDeleteDialogOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setSelectedUser(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -90,12 +197,12 @@ const Users: React.FC = () => {
   const filteredUsers = useMemo(() => {
     return users.filter((user: User) => {
       const matchesSearch =
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase());
+        user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user?.email.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesRole =
         roleFilter === "all" ||
-        user.role.toLowerCase() === roleFilter.toLowerCase();
+        user?.role.toLowerCase() === roleFilter.toLowerCase();
 
       const matchesStatus =
         statusFilter === "all" ||
@@ -199,7 +306,7 @@ const Users: React.FC = () => {
               Active Users
             </Typography>
             <Typography variant="h4" fontWeight="bold" color="success.main">
-              {users.filter(u => u.isActive).length}
+              {users?.filter(u => u?.isActive).length}
             </Typography>
           </Paper>
         </Box>
@@ -378,13 +485,13 @@ const Users: React.FC = () => {
                           <Visibility sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Send Email">
+                      <Tooltip title="More Actions">
                         <IconButton 
                           size="small" 
-                          color="secondary"
+                          onClick={(e) => handleMenuOpen(e, user)}
                           sx={{ padding: { xs: "4px", sm: "8px" } }}
                         >
-                          <Email sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
+                          <MoreVert sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
                         </IconButton>
                       </Tooltip>
                     </Box>
@@ -417,6 +524,92 @@ const Users: React.FC = () => {
           />
         )}
       </Paper>
+
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={handleRoleChange}>
+          <ListItemIcon>
+            <Edit fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Change Role</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleStatusToggle}>
+          <ListItemIcon>
+            <AdminPanelSettings fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>
+            {selectedUser?.isActive ? 'Deactivate' : 'Activate'} User
+          </ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
+          <ListItemIcon>
+            <Delete fontSize="small" sx={{ color: 'error.main' }} />
+          </ListItemIcon>
+          <ListItemText>Delete User</ListItemText>
+        </MenuItem>
+      </Menu>
+
+      {/* Role Change Dialog */}
+      <Dialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)}>
+        <DialogTitle>Change User Role</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Change role for: <strong>{selectedUser?.name}</strong>
+          </Typography>
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel>Role</InputLabel>
+            <Select
+              value={newRole}
+              label="Role"
+              onChange={(e) => setNewRole(e.target.value)}
+            >
+              <MenuItem value="user">User</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRoleDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleRoleUpdate} variant="contained">Update Role</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+        <DialogTitle>Delete User</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete user <strong>{selectedUser?.name}</strong>?
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+      />
     </Box>
   );
 };

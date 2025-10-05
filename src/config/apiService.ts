@@ -91,6 +91,26 @@ class ApiService {
       method: 'GET'
     })
   }
+
+  async updateUserRole(id: string, role: string): Promise<ApiResponse> {
+    return this.request(`/api/users/${id}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role })
+    })
+  }
+
+  async updateUserStatus(id: string, isActive: boolean): Promise<ApiResponse> {
+    return this.request(`/api/users/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ isActive })
+    })
+  }
+
+  async deleteUser(id: string): Promise<ApiResponse> {
+    return this.request(`/api/users/${id}`, {
+      method: 'DELETE'
+    })
+  }
 }
 
 export const apiService = new ApiService()
