@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
@@ -24,9 +24,10 @@ import {
 interface DashboardLayoutProps {
   user: any;
   onLogout: () => void;
+  children: React.ReactNode;
 }
 
-const DashboardLayout = ({ user, onLogout }: DashboardLayoutProps) => {
+const DashboardLayout = ({ user, onLogout, children }: DashboardLayoutProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,9 +35,9 @@ const DashboardLayout = ({ user, onLogout }: DashboardLayoutProps) => {
   // Map routes to tab values
   const routeToTab: { [key: string]: number } = {
     "/dashboard": 0,
-    "/dashboard/users": 1,
-    "/dashboard/leads": 2,
-    "/dashboard/settings": 3,
+    "/users": 1,
+    "/leads": 2,
+    "/settings": 3,
   };
 
   // Get current tab based on route
@@ -45,9 +46,9 @@ const DashboardLayout = ({ user, onLogout }: DashboardLayoutProps) => {
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     const routes = [
       "/dashboard",
-      "/dashboard/users",
-      "/dashboard/leads",
-      "/dashboard/settings",
+      "/users",
+      "/leads",
+      "/settings",
     ];
     navigate(routes[newValue]);
   };
@@ -149,7 +150,7 @@ const DashboardLayout = ({ user, onLogout }: DashboardLayoutProps) => {
 
       {/* Main Content */}
       <Box>
-        <Outlet />
+        {children}
       </Box>
     </Box>
   );

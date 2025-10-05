@@ -272,12 +272,10 @@ function App() {
         <Routes>
           {isAuthenticated ? (
             <>
-              <Route path="/dashboard" element={<DashboardLayout user={user} onLogout={handleLogout} />}>
-                <Route index element={<DashboardOverview user={user} />} />
-                <Route path="users" element={<Users />} />
-                <Route path="leads" element={<Leads />} />
-                <Route path="settings" element={<Settings />} />
-              </Route>
+              <Route path="/dashboard" element={<DashboardLayout user={user} onLogout={handleLogout}><DashboardOverview user={user} /></DashboardLayout>} />
+              <Route path="/users" element={<DashboardLayout user={user} onLogout={handleLogout}><Users /></DashboardLayout>} />
+              <Route path="/leads" element={<DashboardLayout user={user} onLogout={handleLogout}><Leads /></DashboardLayout>} />
+              <Route path="/settings" element={<DashboardLayout user={user} onLogout={handleLogout}><Settings /></DashboardLayout>} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </>
