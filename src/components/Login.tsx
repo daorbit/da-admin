@@ -218,24 +218,7 @@ const Login = ({ onLogin }: LoginProps) => {
           {loading ? 'Signing you in...' : 'Sign In'}
         </Button>
 
-        <Box mt={3} textAlign="center">
-          <Typography variant="body2" color="text.secondary">
-            Forgot your password?{' '}
-            <Box
-              component="span"
-              sx={{
-                color: 'primary.main',
-                cursor: 'pointer',
-                fontWeight: 500,
-                '&:hover': {
-                  textDecoration: 'underline',
-                },
-              }}
-            >
-              Reset it here
-            </Box>
-          </Typography>
-        </Box>
+        
       </Box>
     </Paper>
   )

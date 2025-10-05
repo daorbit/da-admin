@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
-import { CssBaseline, CircularProgress, Box, Typography } from '@mui/material'
+import { CssBaseline, CircularProgress, Box } from '@mui/material'
 import apiService from './config/apiService'
 import './config/testApi' // This will auto-test API connection in development
 import './App.css'
 import Dashboard from './components/Dashboard'
-import Signup from './components/Signup'
-import Login from './components/Login'
+import LoginPage from './pages/LoginPage'
+import PasskeyVerificationPage from './pages/PasskeyVerificationPage'
+import SignupPage from './pages/SignupPage'
 
 // Create modern MUI theme with beautiful design system
 const theme = createTheme({
@@ -200,7 +202,6 @@ const theme = createTheme({
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [showSignup, setShowSignup] = useState(false)
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -230,7 +231,6 @@ function App() {
   }, [])
 
   const handleLogin = (userData: any, token: string) => {
-    debugger
     localStorage.setItem('token', token)
     setUser(userData)
     setIsAuthenticated(true)
@@ -264,91 +264,25 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {isAuthenticated ? (
-        <Dashboard user={user} onLogout={handleLogout} />
-      ) : (
-        <Box
-          sx={{
-            minHeight: '100vh',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 2,
-          }}
-        >
-          <Box
-            sx={{
-              maxWidth: 400,
-              width: '100%',
-              textAlign: 'center',
-            }}
-          >
-            <Typography
-              variant="h2"
-              sx={{
-                color: 'white',
-                mb: 4,
-                fontWeight: 700,
-                textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              }}
-            >
-              DA Admin
-            </Typography>
-            {showSignup ? (
-              <>
-                <Signup onSignup={handleLogin} />
-                <Typography sx={{ mt: 2, color: 'white' }}>
-                  Already have an account?{' '}
-                  <Box
-                    component="button"
-                    onClick={() => setShowSignup(false)}
-                    sx={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#FBBF24',
-                      cursor: 'pointer',
-                      textDecoration: 'underline',
-                      fontSize: 'inherit',
-                      fontWeight: 500,
-                      '&:hover': {
-                        color: '#F59E0B',
-                      },
-                    }}
-                  >
-                    Login here
-                  </Box>
-                </Typography>
-              </>
-            ) : (
-              <>
-                <Login onLogin={handleLogin} />
-                <Typography sx={{ mt: 2, color: 'white' }}>
-                  Don't have an account?{' '}
-                  <Box
-                    component="button"
-                    onClick={() => setShowSignup(true)}
-                    sx={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#FBBF24',
-                      cursor: 'pointer',
-                      textDecoration: 'underline',
-                      fontSize: 'inherit',
-                      fontWeight: 500,
-                      '&:hover': {
-                        color: '#F59E0B',
-                      },
-                    }}
-                  >
-                    Sign up here
-                  </Box>
-                </Typography>
-              </>
-            )}
-          </Box>
-        </Box>
-      )}
+      <Router>
+        <Routes>
+          {isAuthenticated ? (
+            <>
+              <Route path="/" element={<Dashboard user={user} onLogout={handleLogout} />} />
+              <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          ) : (
+            <>
+              <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+              <Route path="/passkey-verification" element={<PasskeyVerificationPage />} />
+              <Route path="/signup" element={<SignupPage onSignup={handleLogin} />} />
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </>
+          )}
+        </Routes>
+      </Router>
     </ThemeProvider>
   )
 }
