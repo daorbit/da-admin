@@ -6,13 +6,29 @@ export interface User {
   name: string
   email: string
   role: string
-  createdAt: string
+  avatar: string | null
+  isActive: boolean
   lastLogin?: string
-  isActive?: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+interface Pagination {
+  page: number
+  limit: number
+  total: number
+  pages: number
+}
+
+interface Stats {
+  total: number
+  admin: number
 }
 
 interface UsersState {
   users: User[]
+  pagination: Pagination | null
+  stats: Stats | null
   loading: boolean
   error: string | null
   lastFetch: number | null
@@ -20,6 +36,8 @@ interface UsersState {
 
 const initialState: UsersState = {
   users: [],
+  pagination: null,
+  stats: null,
   loading: false,
   error: null,
   lastFetch: null,
@@ -32,8 +50,12 @@ export const fetchUsers = createAsyncThunk(
     try {
       const response = await apiService.getAllUsers()
       
-      if (response.success && response.data?.users) {
-        return response.data.users
+      if (response.success) {
+        return {
+          users: response.users || [],
+          pagination: response.pagination || null,
+          stats: response.stats || null
+        }
       } else {
         return rejectWithValue(response.message || 'Failed to fetch users')
       }
@@ -57,9 +79,11 @@ const usersSlice = createSlice({
         state.loading = true
         state.error = null
       })
-      .addCase(fetchUsers.fulfilled, (state, action: PayloadAction<User[]>) => {
+      .addCase(fetchUsers.fulfilled, (state, action: PayloadAction<{users: User[], pagination: Pagination | null, stats: Stats | null}>) => {
         state.loading = false
-        state.users = action.payload
+        state.users = action.payload.users
+        state.pagination = action.payload.pagination
+        state.stats = action.payload.stats
         state.lastFetch = Date.now()
       })
       .addCase(fetchUsers.rejected, (state, action) => {

@@ -22,11 +22,11 @@ interface LeadsPagination {
 
 interface LeadsStats {
   total: number
-  new: number
-  contacted: number
-  qualified: number
-  converted: number
-  closed: number
+  new?: number
+  contacted?: number
+  qualified?: number
+  converted?: number
+  closed?: number
 }
 
 interface FetchLeadsParams {
@@ -89,9 +89,9 @@ export const fetchLeads = createAsyncThunk(
 
       if (data.success) {
         return {
-          leads: data.data.leads,
-          pagination: data.data.pagination,
-          stats: data.data.stats
+          leads: data.leads || [],
+          pagination: data.pagination || { page: 1, limit: 10, total: 0, pages: 0 },
+          stats: data.stats || { total: 0 }
         }
       } else {
         return rejectWithValue(data.message || 'Failed to fetch leads')
