@@ -111,6 +111,38 @@ class ApiService {
       method: 'DELETE'
     })
   }
+
+  // Leads methods
+  async getAllLeads(): Promise<ApiResponse> {
+    return this.request('/api/leads', {
+      method: 'GET'
+    })
+  }
+
+  // Dashboard stats
+  async getDashboardStats(): Promise<ApiResponse> {
+    try {
+      const [usersResponse, leadsResponse] = await Promise.all([
+        this.getAllUsers(),
+        this.getAllLeads()
+      ]);
+
+      const stats = {
+        users: usersResponse.success ? usersResponse : { users: [], stats: { total: 0, admin: 0, user: 0 } },
+        leads: leadsResponse.success ? leadsResponse : { leads: [], stats: { total: 0 } }
+      };
+
+      return {
+        success: true,
+        data: stats
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to fetch dashboard stats'
+      };
+    }
+  }
 }
 
 export const apiService = new ApiService()

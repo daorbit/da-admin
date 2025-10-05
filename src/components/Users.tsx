@@ -53,10 +53,12 @@ import {
   deleteUser,
   User 
 } from "../store/slices/usersSlice";
+import { updateUserStats } from "../store/slices/dashboardSlice";
 
 const Users: React.FC = () => {
   const dispatch = useAppDispatch();
   const { users, pagination, stats, loading, error } = useAppSelector((state) => state.users);
+  const dashboardStats = useAppSelector((state) => state.dashboard.stats);
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -113,6 +115,7 @@ const Users: React.FC = () => {
     if (selectedUser && newRole !== selectedUser.role) {
       try {
         await dispatch(updateUserRole({ id: selectedUser._id, role: newRole })).unwrap();
+        updateDashboardStats();
         setSnackbarMessage('User role updated successfully');
         setSnackbarOpen(true);
       } catch (error) {
@@ -131,6 +134,7 @@ const Users: React.FC = () => {
           id: selectedUser._id, 
           isActive: !selectedUser.isActive 
         })).unwrap();
+        updateDashboardStats();
         setSnackbarMessage(`User ${!selectedUser.isActive ? 'activated' : 'deactivated'} successfully`);
         setSnackbarOpen(true);
       } catch (error) {
@@ -150,6 +154,7 @@ const Users: React.FC = () => {
     if (selectedUser) {
       try {
         await dispatch(deleteUser(selectedUser._id)).unwrap();
+        updateDashboardStats();
         setSnackbarMessage('User deleted successfully');
         setSnackbarOpen(true);
       } catch (error) {
@@ -164,6 +169,19 @@ const Users: React.FC = () => {
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
     setSelectedUser(null);
+  };
+
+  // Helper function to update dashboard stats after user operations
+  const updateDashboardStats = () => {
+    const totalUsers = users.length;
+    const adminUsers = users.filter(u => u.role === 'admin').length;
+    const activeUsers = users.filter(u => u.isActive).length;
+    
+    dispatch(updateUserStats({
+      totalUsers,
+      adminUsers,
+      activeUsers
+    }));
   };
 
   const formatDate = (dateString: string) => {
@@ -282,15 +300,15 @@ const Users: React.FC = () => {
         </Button>
       </Box>
 
-      {/* Stats Section */}
-      {stats && (
+      {/* Stats Section - Use dashboard stats if available, fallback to users stats */}
+      {(dashboardStats || stats) && (
         <Box sx={{ mb: 3, display: "flex", gap: 2, flexWrap: "wrap" }}>
           <Paper elevation={1} sx={{ p: 2, flex: "1 1 200px", minWidth: 150 }}>
             <Typography variant="body2" color="text.secondary" gutterBottom>
               Total Users
             </Typography>
             <Typography variant="h4" fontWeight="bold">
-              {stats.total}
+              {dashboardStats?.totalUsers || stats?.total || users?.length || 0}
             </Typography>
           </Paper>
           <Paper elevation={1} sx={{ p: 2, flex: "1 1 200px", minWidth: 150 }}>
@@ -298,7 +316,7 @@ const Users: React.FC = () => {
               Admin Users
             </Typography>
             <Typography variant="h4" fontWeight="bold" color="error.main">
-              {stats.admin}
+              {dashboardStats?.adminUsers || stats?.admin || users?.filter(u => u.role === 'admin').length || 0}
             </Typography>
           </Paper>
           <Paper elevation={1} sx={{ p: 2, flex: "1 1 200px", minWidth: 150 }}>
@@ -306,7 +324,7 @@ const Users: React.FC = () => {
               Active Users
             </Typography>
             <Typography variant="h4" fontWeight="bold" color="success.main">
-              {users?.filter(u => u?.isActive).length}
+              {dashboardStats?.activeUsers || users?.filter(u => u?.isActive).length || 0}
             </Typography>
           </Paper>
         </Box>

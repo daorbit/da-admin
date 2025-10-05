@@ -8,7 +8,6 @@ import {
   Tab,
   Tabs,
   Avatar,
-  Chip,
   IconButton,
   Menu,
   MenuItem,
@@ -20,8 +19,6 @@ import {
   Settings,
   AccountCircle,
   Logout,
-  Person,
-  AdminPanelSettings,
 } from "@mui/icons-material";
 
 interface DashboardLayoutProps {
@@ -36,17 +33,22 @@ const DashboardLayout = ({ user, onLogout }: DashboardLayoutProps) => {
 
   // Map routes to tab values
   const routeToTab: { [key: string]: number } = {
-    '/dashboard': 0,
-    '/dashboard/users': 1,
-    '/dashboard/leads': 2,
-    '/dashboard/settings': 3,
+    "/dashboard": 0,
+    "/dashboard/users": 1,
+    "/dashboard/leads": 2,
+    "/dashboard/settings": 3,
   };
 
   // Get current tab based on route
   const currentTab = routeToTab[location.pathname] ?? 0;
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    const routes = ['/dashboard', '/dashboard/users', '/dashboard/leads', '/dashboard/settings'];
+    const routes = [
+      "/dashboard",
+      "/dashboard/users",
+      "/dashboard/leads",
+      "/dashboard/settings",
+    ];
     navigate(routes[newValue]);
   };
 
@@ -61,14 +63,6 @@ const DashboardLayout = ({ user, onLogout }: DashboardLayoutProps) => {
   const handleLogout = () => {
     handleProfileMenuClose();
     onLogout();
-  };
-
-  const getRoleColor = (role: string) => {
-    return role === 'admin' ? 'error' : 'primary';
-  };
-
-  const getRoleIcon = (role: string) => {
-    return role === 'admin' ? <AdminPanelSettings /> : <Person />;
   };
 
   return (
@@ -93,22 +87,6 @@ const DashboardLayout = ({ user, onLogout }: DashboardLayoutProps) => {
                   >
                     {user.name?.charAt(0).toUpperCase() || "U"}
                   </Avatar>
-                  <Box sx={{ display: { xs: "none", sm: "block" } }}>
-                    <Typography variant="body2" sx={{ color: "inherit" }}>
-                      {user.name}
-                    </Typography>
-                    <Chip
-                      icon={getRoleIcon(user.role)}
-                      label={user.role?.charAt(0).toUpperCase() + user.role?.slice(1)}
-                      color={getRoleColor(user.role) as any}
-                      size="small"
-                      sx={{ 
-                        height: 20, 
-                        fontSize: "0.625rem",
-                        '& .MuiChip-icon': { fontSize: '0.875rem' }
-                      }}
-                    />
-                  </Box>
                 </Box>
                 <IconButton color="inherit" onClick={handleProfileMenuOpen}>
                   <AccountCircle />
