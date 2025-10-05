@@ -37,7 +37,7 @@ import { fetchUsers, clearError, User } from "../store/slices/usersSlice";
 
 const Users: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { users, loading, error } = useAppSelector((state) => state.users);
+  const { users, pagination, stats, loading, error } = useAppSelector((state) => state.users);
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -99,7 +99,7 @@ const Users: React.FC = () => {
 
       const matchesStatus =
         statusFilter === "all" ||
-        (statusFilter === "active" && user.isActive !== false) ||
+        (statusFilter === "active" && user.isActive === true) ||
         (statusFilter === "inactive" && user.isActive === false);
 
       return matchesSearch && matchesRole && matchesStatus;
@@ -154,6 +154,8 @@ const Users: React.FC = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 2,
         }}
       >
         <Typography
@@ -172,6 +174,36 @@ const Users: React.FC = () => {
           Refresh
         </Button>
       </Box>
+
+      {/* Stats Section */}
+      {stats && (
+        <Box sx={{ mb: 3, display: "flex", gap: 2, flexWrap: "wrap" }}>
+          <Paper elevation={1} sx={{ p: 2, flex: "1 1 200px", minWidth: 150 }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Total Users
+            </Typography>
+            <Typography variant="h4" fontWeight="bold">
+              {stats.total}
+            </Typography>
+          </Paper>
+          <Paper elevation={1} sx={{ p: 2, flex: "1 1 200px", minWidth: 150 }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Admin Users
+            </Typography>
+            <Typography variant="h4" fontWeight="bold" color="error.main">
+              {stats.admin}
+            </Typography>
+          </Paper>
+          <Paper elevation={1} sx={{ p: 2, flex: "1 1 200px", minWidth: 150 }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Active Users
+            </Typography>
+            <Typography variant="h4" fontWeight="bold" color="success.main">
+              {users.filter(u => u.isActive).length}
+            </Typography>
+          </Paper>
+        </Box>
+      )}
 
       {/* Filter Controls */}
       <Paper elevation={1} sx={{ mb: 2, p: 2 }}>
@@ -235,6 +267,7 @@ const Users: React.FC = () => {
         <Box p={2} borderBottom={1} borderColor="divider">
           <Typography variant="h6" color="text.secondary">
             Showing {filteredUsers.length} of {users.length} users
+            {pagination && ` (Page ${pagination.page} of ${pagination.pages})`}
           </Typography>
         </Box>
 
@@ -256,6 +289,7 @@ const Users: React.FC = () => {
                   <TableCell sx={{ minWidth: 200 }}>
                     <Box display="flex" alignItems="center" gap={{ xs: 1, sm: 2 }}>
                       <Avatar 
+                        src={user.avatar || undefined}
                         sx={{ 
                           bgcolor: "primary.main",
                           width: { xs: 32, sm: 40 },
@@ -324,8 +358,8 @@ const Users: React.FC = () => {
                   </TableCell>
                   <TableCell sx={{ minWidth: 80 }}>
                     <Chip
-                      label={user.isActive !== false ? "Active" : "Inactive"}
-                      color={user.isActive !== false ? "success" : "default"}
+                      label={user.isActive ? "Active" : "Inactive"}
+                      color={user.isActive ? "success" : "default"}
                       size="small"
                       sx={{ 
                         fontSize: { xs: "0.625rem", sm: "0.75rem" },

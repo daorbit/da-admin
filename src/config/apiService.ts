@@ -7,6 +7,9 @@ export interface ApiResponse<T = any> {
   errors?: any[]
   token?: string
   user?: any
+  users?: any[]
+  pagination?: any
+  stats?: any
 }
 
 class ApiService {

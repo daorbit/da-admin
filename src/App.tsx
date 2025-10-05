@@ -230,6 +230,7 @@ function App() {
   }, [])
 
   const handleLogin = (userData: any, token: string) => {
+    debugger
     localStorage.setItem('token', token)
     setUser(userData)
     setIsAuthenticated(true)
