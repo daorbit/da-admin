@@ -27,17 +27,12 @@ import {
 import {
   Person,
   AdminPanelSettings,
-  Visibility,
   Search,
   Refresh,
   Edit,
   Delete,
-  MoreVert,
 } from "@mui/icons-material";
 import {
-  Menu,
-  ListItemIcon,
-  ListItemText,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -69,11 +64,8 @@ const Users: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Action menu states
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  // Dialog states and selected user
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  
-  // Dialog states
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [newRole, setNewRole] = useState('');
@@ -93,22 +85,32 @@ const Users: React.FC = () => {
     dispatch(fetchUsers());
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, user: User) => {
-    setAnchorEl(event.currentTarget);
+  const handleRoleChange = (user: User) => {
     setSelectedUser(user);
+    setNewRole(user.role);
+    setRoleDialogOpen(true);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
+  const handleStatusToggle = async (user: User) => {
+    setSelectedUser(user);
+    try {
+      await dispatch(updateUserStatus({ 
+        id: user._id, 
+        isActive: !user.isActive 
+      })).unwrap();
+      updateDashboardStats();
+      setSnackbarMessage(`User ${!user.isActive ? 'activated' : 'deactivated'} successfully`);
+      setSnackbarOpen(true);
+    } catch (error) {
+      setSnackbarMessage('Failed to update user status');
+      setSnackbarOpen(true);
+    }
     setSelectedUser(null);
   };
 
-  const handleRoleChange = () => {
-    if (selectedUser) {
-      setNewRole(selectedUser.role);
-      setRoleDialogOpen(true);
-    }
-    handleMenuClose();
+  const handleDeleteClick = (user: User) => {
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
   };
 
   const handleRoleUpdate = async () => {
@@ -123,50 +125,40 @@ const Users: React.FC = () => {
         setSnackbarOpen(true);
       }
     }
+    handleRoleDialogClose();
+  };
+
+  const handleRoleDialogClose = () => {
     setRoleDialogOpen(false);
     setSelectedUser(null);
+    setNewRole('');
   };
 
-  const handleStatusToggle = async () => {
-    if (selectedUser) {
-      try {
-        await dispatch(updateUserStatus({ 
-          id: selectedUser._id, 
-          isActive: !selectedUser.isActive 
-        })).unwrap();
-        updateDashboardStats();
-        setSnackbarMessage(`User ${!selectedUser.isActive ? 'activated' : 'deactivated'} successfully`);
-        setSnackbarOpen(true);
-      } catch (error) {
-        setSnackbarMessage('Failed to update user status');
-        setSnackbarOpen(true);
-      }
-    }
-    handleMenuClose();
-  };
 
-  const handleDeleteClick = () => {
-    setDeleteDialogOpen(true);
-    handleMenuClose();
-  };
 
   const handleDeleteConfirm = async () => {
     if (selectedUser) {
+      console.log('Attempting to delete user:', selectedUser._id);
       try {
-        await dispatch(deleteUser(selectedUser._id)).unwrap();
+        const result = await dispatch(deleteUser(selectedUser._id)).unwrap();
+        console.log('Delete result:', result);
         updateDashboardStats();
         setSnackbarMessage('User deleted successfully');
         setSnackbarOpen(true);
       } catch (error) {
-        setSnackbarMessage('Failed to delete user');
+        console.error('Delete error:', error);
+        setSnackbarMessage(`Failed to delete user: ${error}`);
         setSnackbarOpen(true);
       }
     }
-    setDeleteDialogOpen(false);
-    setSelectedUser(null);
+    handleDeleteDialogClose();
   };
 
   const handleDeleteCancel = () => {
+    handleDeleteDialogClose();
+  };
+
+  const handleDeleteDialogClose = () => {
     setDeleteDialogOpen(false);
     setSelectedUser(null);
   };
@@ -215,8 +207,8 @@ const Users: React.FC = () => {
   const filteredUsers = useMemo(() => {
     return users.filter((user: User) => {
       const matchesSearch =
-        user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user?.email.toLowerCase().includes(searchTerm.toLowerCase());
+        user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user?.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesRole =
         roleFilter === "all" ||
@@ -492,24 +484,36 @@ const Users: React.FC = () => {
                       }}
                     />
                   </TableCell>
-                  <TableCell align="center" sx={{ minWidth: 100 }}>
+                  <TableCell align="center" sx={{ minWidth: 140 }}>
                     <Box sx={{ display: "flex", justifyContent: "center", gap: { xs: 0.5, sm: 1 } }}>
-                      <Tooltip title="View Details">
+                      <Tooltip title="Change Role">
                         <IconButton 
                           size="small" 
                           color="primary"
+                          onClick={() => handleRoleChange(user)}
                           sx={{ padding: { xs: "4px", sm: "8px" } }}
                         >
-                          <Visibility sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
+                          <Edit sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="More Actions">
+                      <Tooltip title={user.isActive ? "Deactivate User" : "Activate User"}>
                         <IconButton 
                           size="small" 
-                          onClick={(e) => handleMenuOpen(e, user)}
+                          color={user.isActive ? "warning" : "success"}
+                          onClick={() => handleStatusToggle(user)}
                           sx={{ padding: { xs: "4px", sm: "8px" } }}
                         >
-                          <MoreVert sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
+                          <AdminPanelSettings sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete User">
+                        <IconButton 
+                          size="small" 
+                          color="error"
+                          onClick={() => handleDeleteClick(user)}
+                          sx={{ padding: { xs: "4px", sm: "8px" } }}
+                        >
+                          <Delete sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
                         </IconButton>
                       </Tooltip>
                     </Box>
@@ -543,45 +547,16 @@ const Users: React.FC = () => {
         )}
       </Paper>
 
-      {/* Action Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem onClick={handleRoleChange}>
-          <ListItemIcon>
-            <Edit fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Change Role</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={handleStatusToggle}>
-          <ListItemIcon>
-            <AdminPanelSettings fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>
-            {selectedUser?.isActive ? 'Deactivate' : 'Activate'} User
-          </ListItemText>
-        </MenuItem>
-        <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
-          <ListItemIcon>
-            <Delete fontSize="small" sx={{ color: 'error.main' }} />
-          </ListItemIcon>
-          <ListItemText>Delete User</ListItemText>
-        </MenuItem>
-      </Menu>
+
 
       {/* Role Change Dialog */}
-      <Dialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)}>
-        <DialogTitle>Change User Role</DialogTitle>
+      <Dialog 
+        open={roleDialogOpen} 
+        onClose={handleRoleDialogClose}
+        aria-labelledby="role-dialog-title"
+        disableRestoreFocus
+      >
+        <DialogTitle id="role-dialog-title">Change User Role</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2 }}>
             Change role for: <strong>{selectedUser?.name}</strong>
@@ -599,14 +574,19 @@ const Users: React.FC = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setRoleDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleRoleDialogClose}>Cancel</Button>
           <Button onClick={handleRoleUpdate} variant="contained">Update Role</Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
-        <DialogTitle>Delete User</DialogTitle>
+      <Dialog 
+        open={deleteDialogOpen} 
+        onClose={handleDeleteDialogClose}
+        aria-labelledby="delete-dialog-title"
+        disableRestoreFocus
+      >
+        <DialogTitle id="delete-dialog-title">Delete User</DialogTitle>
         <DialogContent>
           <Typography>
             Are you sure you want to delete user <strong>{selectedUser?.name}</strong>?
