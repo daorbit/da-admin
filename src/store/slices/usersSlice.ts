@@ -11,6 +11,9 @@ export interface User {
   lastLogin?: string
   createdAt: string
   updatedAt: string
+  sourceApp?: 'snappixy' | 'the-techodio' | 'draft2dev' | 'da-admin'
+  authProvider?: 'local' | 'google'
+  googleId?: string
 }
 
 interface Pagination {

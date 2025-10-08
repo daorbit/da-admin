@@ -203,6 +203,36 @@ const Users: React.FC = () => {
     return role.toLowerCase() === "admin" ? <AdminPanelSettings /> : <Person />;
   };
 
+  const getSourceAppLabel = (sourceApp: string) => {
+    switch (sourceApp) {
+      case 'snappixy':
+        return 'Snappixy';
+      case 'the-techodio':
+        return 'The Techodio';
+      case 'draft2dev':
+        return 'Draft2Dev';
+      case 'da-admin':
+        return 'DA Admin';
+      default:
+        return 'Unknown';
+    }
+  };
+
+  const getSourceAppColor = (sourceApp: string) => {
+    switch (sourceApp) {
+      case 'snappixy':
+        return 'secondary';
+      case 'the-techodio':
+        return 'success';
+      case 'draft2dev':
+        return 'warning';
+      case 'da-admin':
+        return 'info';
+      default:
+        return 'default';
+    }
+  };
+
   // Filter users based on search term, role, and status
   const filteredUsers = useMemo(() => {
     return users.filter((user: User) => {
@@ -394,6 +424,8 @@ const Users: React.FC = () => {
               <TableRow>
                 <TableCell sx={{ minWidth: 200 }}>User</TableCell>
                 <TableCell sx={{ minWidth: 100 }}>Role</TableCell>
+                <TableCell sx={{ minWidth: 120 }}>Source App</TableCell>
+                <TableCell sx={{ minWidth: 120 }}>Auth Method</TableCell>
                 <TableCell sx={{ minWidth: 120 }}>Created</TableCell>
                 <TableCell sx={{ minWidth: 120 }}>Last Login</TableCell>
                 <TableCell sx={{ minWidth: 80 }}>Status</TableCell>
@@ -450,6 +482,29 @@ const Users: React.FC = () => {
                       }
                       color={getRoleColor(user.role) as any}
                       size="small"
+                      sx={{ 
+                        fontSize: { xs: "0.625rem", sm: "0.75rem" },
+                        height: { xs: 20, sm: 24 }
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>
+                    <Chip
+                      label={getSourceAppLabel(user.sourceApp || 'da-admin')}
+                      color={getSourceAppColor(user.sourceApp || 'da-admin') as any}
+                      size="small"
+                      sx={{ 
+                        fontSize: { xs: "0.625rem", sm: "0.75rem" },
+                        height: { xs: 20, sm: 24 }
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>
+                    <Chip
+                      label={user.authProvider === 'google' ? 'Google' : 'Email'}
+                      color={user.authProvider === 'google' ? 'info' : 'default'}
+                      size="small"
+                      variant={user.authProvider === 'google' ? 'filled' : 'outlined'}
                       sx={{ 
                         fontSize: { xs: "0.625rem", sm: "0.75rem" },
                         height: { xs: 20, sm: 24 }
